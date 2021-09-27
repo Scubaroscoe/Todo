@@ -1,4 +1,43 @@
+body {
+    background-color:azure 
+}
+
 h1 {
     font-size: 26px;
     text-align: center;
+}
+
+.todoDiv {
+    border-style: outset;
+    border-color: aqua;
+} 
+
+ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+li {
+    text-decoration: none;
+    margin: 10px;
+    font-size: larger;
+    /* outline: solid; */
+}
+
+#create-div {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+#create-todo-btn, #title-input, #description-input, #date-input, #priority-input {
+    margin: 3px;
+}
+
+#priority-input {
+    flex-shrink: 4;
+}
+
+#title-input {
+    flex-shrink: 2;
 }

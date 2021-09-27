@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/Scubaroscoe/Todo#readme",
   "dependencies": {
+    "bootstrap": "^5.1.1",
+    "date-fns": "^2.24.0",
+    "js-datepicker": "^5.18.0",
     "webpack": "^5.54.0"
   },
   "devDependencies": {
