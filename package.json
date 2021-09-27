@@ -1,0 +1,30 @@
+{
+  "name": "todo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Scubaroscoe/Todo.git"
+  },
+  "author": "Alexander Konefal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Scubaroscoe/Todo/issues"
+  },
+  "homepage": "https://github.com/Scubaroscoe/Todo#readme",
+  "dependencies": {
+    "webpack": "^5.54.0"
+  },
+  "devDependencies": {
+    "css-loader": "^6.3.0",
+    "html-webpack-plugin": "^5.3.2",
+    "style-loader": "^3.3.0",
+    "webpack-cli": "^4.8.0"
+  }
+}
