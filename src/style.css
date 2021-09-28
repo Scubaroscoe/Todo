@@ -1,5 +1,73 @@
 body {
-    background-color:azure 
+    background-color:azure;
+    margin: 0px;
+    width: 100%;
+}
+
+#parent-div {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+#left-div {
+    /* width: 10vh; */
+    display: flex;
+    flex-flow: column;
+    margin-right: 3px;
+}
+
+#right-div {
+    /* width: calc(100% - 10vh); */
+}
+
+.collapsible {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 5px;
+    /* width: 100%; */
+    /* height: 5vh; */
+    border: none;
+    /* text-align: center; */
+    /* writing-mode: vertical-rl; */
+    /* text-orientation: mixed; */
+    outline: none;
+    font-size: 15px;
+    margin: 3px;
+
+}
+
+#collapsible-p {
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    margin: 0px;
+    /* transition: writing-mode 2s, text-orientation 2s; */
+}
+
+/* #collapsible-p:hover {
+    writing-mode: horizontal-tb;
+    text-orientation:sideways-right;
+} */
+
+.active, .collapsible:hover {
+    background-color: #ccc;
+}
+
+.content {
+    padding: 0 5px;
+    display: none;
+    overflow: hidden;
+    background-color: #f1f1f1;
+    /* height: calc(100% - 5vh); */
+}
+
+#collapsible-div {
+    margin: 3px;
+}
+
+#collapsible-projects {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 h1 {
@@ -7,9 +75,16 @@ h1 {
     text-align: center;
 }
 
+h2 {
+    text-align: center;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
 .todoDiv {
     border-style: outset;
     border-color: aqua;
+    border-radius: 40px;
 } 
 
 ul {
@@ -28,16 +103,40 @@ li {
 #create-div {
     display: flex;
     flex-wrap: nowrap;
+    border: solid;
 }
 
-#create-todo-btn, #title-input, #description-input, #date-input, #priority-input {
+#create-todo-btn, #title-input, #description-textarea, #date-input, #priority-input {
     margin: 3px;
 }
 
-#priority-input {
-    flex-shrink: 4;
+#create-todo-btn {
+    background: #32c2f9;
 }
 
-#title-input {
-    flex-shrink: 2;
+button {
+    border-radius: 20px;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    /* height:2.5rem; */
+}
+
+#footer-div {
+    display: flex;
+    border: solid;
+    margin: 5px;
+    justify-content: space-between;
+}
+
+#projects-header, #projects-input, #projects-button {
+    margin: 3px;
+}
+
+.project-btn {
+    border-radius: 26px;
+    height: 5vh;
 }
