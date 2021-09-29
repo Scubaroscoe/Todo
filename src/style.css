@@ -63,6 +63,8 @@ body {
 
 #collapsible-div {
     margin: 3px;
+    /* display: flex; */
+    flex-direction: column;
 }
 
 #collapsible-projects {
@@ -106,7 +108,8 @@ li {
     border: solid;
 }
 
-#create-todo-btn, #title-input, #description-textarea, #date-input, #priority-input {
+#create-todo-btn, #title-input, #description-textarea, #date-input, 
+#priority-input, #project-input {
     margin: 3px;
 }
 
@@ -139,4 +142,16 @@ button {
 .project-btn {
     border-radius: 26px;
     height: 5vh;
+    margin: 2px;
+}
+
+#todo-table {
+    border: solid;
+    width: 100%;
+    border-color: aqua;
+    margin-top: 3px;
+}
+
+table, th, td {
+    border: 1px solid black;
 }

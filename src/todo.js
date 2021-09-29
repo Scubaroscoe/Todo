@@ -1,35 +1,90 @@
-import {format, formatDistance, formatRElative, subDays} from 'date-fns';
+import {format} from 'date-fns';
 
-// format(new Date(2021, 9, 27), 'MM/dd/yyyy');
 
-function Todo(title, description, dueDate, priority, checked) {
+// This function checks if browser can use webstorage API. Only really old browsers would not work
+function storageAvailable(type) {
+	var storage;
+	try {
+		storage = window[type];
+		var x = '__storage_test__';
+		storage.setItem(x, x);
+		storage.removeItem(x);
+		return true;
+	} catch(e) {
+		return e instanceof DOMException && (
+			//everything except firefox
+			e.code === 22 ||
+			// test name field too, because code might not be present
+			//everything except firefox
+			e.name === 'QuotaExceededError' ||
+			// Firefox
+			e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+			// acknowledge QuotaExceededError only if there's something already stored
+			(storage && storage.length != 0);
+	}
+}
+
+if (storageAvailable('localStorage')) {
+	console.log('Local Storage is usable!');
+} else {
+	console.log('Local storage is not usable...');
+}
+
+let todoArray = [];
+function populateStorage() {
+	todoArray = todoArray.filter(n => n);
+	console.log(`populating storage with this: ${JSON.stringify(todoArray)}`);
+	localStorage.setItem('todoArray', JSON.stringify(todoArray));
+	setStorage();
+}
+
+function setStorage() {
+	let storedContainer = JSON.parse(localStorage.getItem('todoArray'));
+	if (storedContainer) {	// if storedContainer is not null, then store in library
+		todoArray = storedContainer;
+	} else {	// else set todoArray to empty array
+		todoArray = [];
+	}
+	// localStorage.clear();
+}
+
+if (!localStorage.getItem('todoArray')) {
+	// populate local storage
+	populateStorage();
+} else {
+	// add the existing stored values to the page where they belong
+	setStorage();
+}
+
+function Todo(title, description, dueDate, priority, checked, project) {
     return {
         title: title,
         description: description, 
-        dueDate: format(dueDate, "MM/dd/yyyy"),
+        dueDate: format(new Date(dueDate), "MM/dd/yyyy"),
         priority: priority,
         checked: checked,
-        getTodoDiv() {
-            const todoDiv = document.createElement('div');
-            todoDiv.classList = 'todoDiv';
-            const todoContainer = document.createElement('ul');
+        project: project,
+        // getTodoDiv() {
+        //     const todoDiv = document.createElement('div');
+        //     todoDiv.classList = 'todoDiv';
+        //     const todoContainer = document.createElement('ul');
 
-            const titleLi = document.createElement('li');
-            titleLi.textContent = title;
-            const descLi = document.createElement('li');
-            descLi.textContent = description;
-            const dueDateLi = document.createElement('li');
-            dueDateLi.textContent = this.dueDate;
-            const priorityLi = document.createElement('li');
-            priorityLi.textContent = priority;
-            const checkedLi = document.createElement('li');
-            checkedLi.textContent = checked;
+        //     const titleLi = document.createElement('li');
+        //     titleLi.textContent = title;
+        //     const descLi = document.createElement('li');
+        //     descLi.textContent = description;
+        //     const dueDateLi = document.createElement('li');
+        //     dueDateLi.textContent = this.dueDate;
+        //     const priorityLi = document.createElement('li');
+        //     priorityLi.textContent = priority;
+        //     const checkedLi = document.createElement('li');
+        //     checkedLi.textContent = checked;
 
-            todoContainer.append(titleLi, descLi, dueDateLi, priorityLi, checkedLi);
+        //     todoContainer.append(titleLi, descLi, dueDateLi, priorityLi, checkedLi);
 
-            todoDiv.appendChild(todoContainer);
-            return todoDiv;
-        }
+        //     todoDiv.appendChild(todoContainer);
+        //     return todoDiv;
+        // }
     }
 }
 
@@ -52,13 +107,15 @@ const todoForm = (() => {
         const createTodoBtn = document.createElement('button');
         createTodoBtn.textContent = "Create New Todo";
         createTodoBtn.id = 'create-todo-btn';
-        createTodoBtn.addEventListener('click', addTodo);
+        createTodoBtn.addEventListener('click', btnAddTodoRow);
 
         const titleInput = document.createElement('input');
         titleInput.id = "title-input";
+        titleInput.placeholder = "Title";
 
         const descTextarea = document.createElement('textarea');
         descTextarea.id = "description-textarea";
+        descTextarea.placeholder = "Description...";
 
         const datePicker = document.createElement('input');
         datePicker.type = 'date';
@@ -66,19 +123,49 @@ const todoForm = (() => {
 
         const priorityInput = document.createElement('input');
         priorityInput.id = 'priority-input';
+        priorityInput.placeholder = "Priority";
+
+        const projectInput = document.createElement('input');
+        projectInput.id = 'project-input';
+        projectInput.placeholder = "Project";
 
         // won't add an input for checked, as checked should be false by default
-        creationDiv.append(createTodoBtn, titleInput, descTextarea, datePicker, priorityInput);
+        creationDiv.append(createTodoBtn, titleInput, descTextarea, datePicker, 
+            priorityInput, projectInput);
         holderDiv.append(createHeader, creationDiv);
         // return creationDiv;
         return holderDiv;
     }
 
+    // This is used for the general page
     function makeTodoTable() {
-        makeTableHead();
+        let currentTable = document.querySelector('#todo-table');
+        if (currentTable) {
+            currentTable.remove();
+        }
+        let table = makeTableHead();
+        let body = createBody();
+        table.appendChild(body);
+        return table;
         // addTodoRow() ? or make Table body?
     }
+
+    // // This is for some specific project page
+    // function makeProjTodoTable() {
+    //     // delete previous table elements
+    //     let currentTable = document.querySelector('#todo-table');
+    //     if (currentTable) {
+    //         currentTable.remove();
+    //     }
+    //     let table = makeTableHead();
+    //     let body = createBody();
+    //     table.appendChild(body);
+    //     return table;
+    //     // addTodoRow() ? or make Table body?
+    // }
+
     function makeTableHead() {
+
         let table = document.createElement('table');
         table.id = "todo-table";
         let tblHead = table.createTHead();
@@ -93,79 +180,161 @@ const todoForm = (() => {
             th.appendChild(text);
             tblHeadRow.appendChild(th);
         });
+
+        return table;
     }
 
     function addTodoRow(todo) {
+        let body = document.querySelector('tbody');
+        let row = document.createElement("tr");
+        // row.setAttribute("data-ind", i);
+        for (let prop in todo){
+            //create a table row
+            // create td element and text node. text node fills the td
+            let cell = document.createElement('td');
+            let cellCont = document.createTextNode(`${todo[prop]}`);
+            cell.appendChild(cellCont);
+            row.appendChild(cell);
+        }
+        // this last bit for adding a delete button
+        let cell = document.createElement('td');
+        let delButton = document.createElement('button');
+        delButton.classList = 'del-btn';
+        delButton.textContent = 'Delete';
+        delButton.addEventListener('click', (e) => {
+            todoArray.slice(todoArray.findIndex((element) => {
+                element === todo;
+            }))
+            populateStorage();
+            e.target.parentNode.remove();
+        })
+        cell.appendChild(delButton);
+        row.appendChild(cell);
+        body.appendChild(row);        
+    }
+
+    function btnAddTodoRow(e) {
         let table = document.querySelector('#todo-table');
 
+        let title = document.querySelector('#title-input').value;
+        let description = document.querySelector('#description-textarea').value;
+        let dueDate = document.querySelector('#date-input').value;
+        let priority = document.querySelector('#priority-input').value;
+        let project = document.querySelector('#project-input').value;
+        let todo = new Todo(title, description, dueDate, priority, false, project);
+        // Add row to table here
+        addTodoRow(todo);
+        todoArray.push(todo);
+        populateStorage();
+        // document.querySelector('#right-div').appendChild(todoDiv);
+
     }
     
-    // create all cells
+    // create all rows based on what's in local storage
     // function createTableRows(body, library) {
-    function createTableRows(body) {	
+    function createBody() {	
         // if (library) {	// This needed in case library is set to null by setStorage
-        for (let i = 0; i < library.length; i++){
-            //create a table row
-            const row = document.createElement("tr");
-            row.setAttribute("data-ind", i);
-            for (let j in library[i]) {
-                // create td element and text node. text node fills the td
-                let cell = document.createElement('td');
-                let cellCont = document.createTextNode(`${library[i][j]}`);
-                cell.appendChild(cellCont);
-                row.appendChild(cell);
+        let body = document.createElement('tbody');
+        let projHeader = document.querySelector('#project-header');
+        for (let i = 0; i < todoArray.length; i++){
+            // This is for when page is first loaded
+            if (!projHeader) {
+                let row = makeRow(todoArray[i]);
+                body.appendChild(row);
+            } else if (projHeader.value === "General") {
+                //create a table row
+                let row = makeRow(todoArray[i]);
+                // const row = document.createElement("tr");
+                // row.setAttribute("data-ind", i);
+                // for (let j in todoArray[i]) {
+                //     // create td element and text node. text node fills the td
+                //     let cell = document.createElement('td');
+                //     let cellCont = document.createTextNode(`${todoArray[i][j]}`);
+                //     cell.appendChild(cellCont);
+                //     row.appendChild(cell);
+                // }
+                // // The following code is for creation of delete button
+                // let cell = document.createElement('td');
+                // let delButton = document.createElement('button');
+                // delButton.classList = 'del-btn';
+                // delButton.textContent = 'Delete';
+                // delButton.addEventListener('click', (e) => {
+                //     todoArray.splice(todoArray.findIndex(element => element === todoArray[i]), 1);
+                //     populateStorage();
+                //     e.target.parentNode.parentNode.remove();
+                // })
+                // cell.appendChild(delButton);
+                // row.appendChild(cell);
+                body.appendChild(row);
+            } else if (todoArray[i].project === projHeader.value){
+                //create a table row
+                let row = makeRow(todoArray[i]);
+                // const row = document.createElement("tr");
+                // row.setAttribute("data-ind", i);
+                // for (let j in todoArray[i]) {
+                //     // create td element and text node. text node fills the td
+                //     let cell = document.createElement('td');
+                //     let cellCont = document.createTextNode(`${todoArray[i][j]}`);
+                //     cell.appendChild(cellCont);
+                //     row.appendChild(cell);
+                // }
+                // // The following code is for creation of delete button
+                // let cell = document.createElement('td');
+                // let delButton = document.createElement('button');
+                // delButton.classList = 'del-btn';
+                // delButton.textContent = 'Delete';
+                // delButton.addEventListener('click', (e) => {
+                //     todoArray.splice(todoArray.findIndex(element => element === todoArray[i]), 1);
+                //     populateStorage();
+                //     e.target.parentNode.parentNode.remove();
+                // })
+                // cell.appendChild(delButton);
+                // row.appendChild(cell);
+                body.appendChild(row);
             }
-            // This is hideous, but localStorage was having significant problems with storing 
-            // the functions defined in book, so I made them functions outside of the Book
-            // object. This part is an ugly fix to add the two columns previously assumed to exist
-            // in the book object.
-            for (let k = 0; k < 2; k++) {
-                let cell = document.createElement('td');
-                let cellCont;
-                if (k === 0) {
-                    cellCont = document.createElement('button');
-                    cellCont.textContent = "Remove";
-                    cellCont.addEventListener('click', (e) => {
-                        let parentRow = document.querySelector(`tr[data-ind="${i}"]`);
-                        parentRow.remove();
-                        delete library[i];
-                        populateStorage();	// This to keep stored library perfectly updated
-                    })
-                } else {
-                    cellCont = document.createElement('button');
-                    cellCont.textContent = "Toggle Read";
-                    cellCont.addEventListener('click', (e) => {
-                        library[i].toggle();
-                        let parentRow = document.querySelector(`tr[data-ind="${i}"]`);
-                        let rowCells = parentRow.querySelectorAll('td');
-    
-                        let propVal = rowCells[3].textContent; // This should always be 3
-                        if (propVal === "true" || propVal == "false") {
-                            rowCells[3].textContent = library[i].read;
-                        }
-    
-                        // for (let prop in rowCells) {
-                        // }
-                        populateStorage();	// This to keep stored library perfectly updated
-                    });
-                }
-                cell.appendChild(cellCont);
-                row.appendChild(cell);
-            }
-            body.appendChild(row);
         }
+        return body;
     }
 
-    function addTodo(e) {
-        let title = titleInput.innerHTML;
-        let description = descTextarea.innerHTML;
-        let dueDate = datePicker.innerHTML;
-        let priority = priorityInput.innerHTML;
-        let todoDiv = new Todo(title, description, dueDate, priority, false).getTodoDiv();
-        document.querySelector('#right-div').appendChild(todoDiv);
+    function makeRow(todo) {
+        const row = document.createElement("tr");
+        // row.setAttribute("data-ind", i);
+        for (let j in todo) {
+            // create td element and text node. text node fills the td
+            let cell = document.createElement('td');
+            let cellCont = document.createTextNode(`${todo[j]}`);
+            cell.appendChild(cellCont);
+            row.appendChild(cell);
+        }
+        // The following code is for creation of delete button
+        let cell = document.createElement('td');
+        let delButton = document.createElement('button');
+        delButton.classList = 'del-btn';
+        delButton.textContent = 'Delete';
+        delButton.addEventListener('click', (e) => {
+            todoArray.splice(todoArray.findIndex(element => element === todo), 1);
+            populateStorage();
+            e.target.parentNode.parentNode.remove();
+        })
+        cell.appendChild(delButton);
+        row.appendChild(cell);
+        return row;
     }
 
-    return {create};
+    // function addTodo(e) {
+    //     let title = document.querySelector('#title-input').innerHTML;
+    //     let description = document.querySelector('#description-textarea').innerHTML;
+    //     let dueDate = document.querySelector('#date-input').innerHTML;
+    //     let priority = document.querySelector('#priority-input').innerHTML;
+    //     let project = document.querySelector('#project-input').innerHTML;
+    //     // let todoDiv = new Todo(title, description, dueDate, priority, false).getTodoDiv();
+    //     let todo = new Todo(title, description, dueDate, priority, false, project);        
+    //     // document.querySelector('#right-div').appendChild(todoDiv);
+    //     todoArray.push(todo);
+    //     populateStorage()
+    // }
+
+    return {create, makeTodoTable};
 })();
 
 export {Todo, todoForm};
