@@ -109,7 +109,7 @@ li {
 }
 
 #create-todo-btn, #title-input, #description-textarea, #date-input, 
-#priority-input, #project-input {
+#priority-input, #project-select {
     margin: 3px;
 }
 

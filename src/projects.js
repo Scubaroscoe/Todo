@@ -1,5 +1,6 @@
 // import PubSub from 'pubsub-js';
 import { CleanPlugin } from 'webpack';
+import {todoForm} from './todo.js';
 // this script is to be used for first adding a constant footer containing 
 // details for adding new projects and possibly going to them
 
@@ -44,6 +45,8 @@ function setStorage() {
 	let storedContainer = JSON.parse(localStorage.getItem('projectsArray'));
 	if (storedContainer) {	// if storedContainer is not null, then store in library
 		projectsArray = storedContainer;
+        // projectsArray = ["General", "Houses", "Finances"];
+        // projectsArray.push('General');
 	} else {	// else set projectsArray to empty array
 		projectsArray = [];
 	}
@@ -106,7 +109,9 @@ function changeProject(e) {
     projectHeader.textContent = e.target.innerHTML;
     
     // 2. Change the projects displayed to those that belong in the project
-    
+    let table = todoForm.makeTodoTable();
+    let rightDiv = document.querySelector('#right-div');
+    rightDiv.appendChild(table);
     
     // General is a special case that holds all tasks
 
@@ -142,13 +147,13 @@ export function setupLeftPanel() {
     collapsibleDiv.id = "collapsible-div";
     collapsibleDiv.classList = "content";
     // collapsibleDiv.textContent = "Idk, something for now...";
-    const generalButton = document.createElement('button');
-    generalButton.classList = "project-btn";
-    generalButton.id = "general-button";
-    generalButton.textContent = "General";
-    generalButton.addEventListener('click', changeProject);
+    // const generalButton = document.createElement('button');
+    // generalButton.classList = "project-btn";
+    // generalButton.id = "general-button";
+    // generalButton.textContent = "General";
+    // generalButton.addEventListener('click', changeProject);
 
-    collapsibleDiv.appendChild(generalButton);
+    // collapsibleDiv.appendChild(generalButton);
 
     // fillLeftPanel();
     // add all buttons now
@@ -179,6 +184,8 @@ export function setupLeftPanel() {
     return leftDiv;
 }
 
-function newProject(name) {
-
+function getProjectsArray() {
+    return projectsArray;
 } 
+
+export {getProjectsArray};

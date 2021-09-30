@@ -1,4 +1,5 @@
 import {format} from 'date-fns';
+import {getProjectsArray} from './projects.js';
 
 
 // This function checks if browser can use webstorage API. Only really old browsers would not work
@@ -125,16 +126,33 @@ const todoForm = (() => {
         priorityInput.id = 'priority-input';
         priorityInput.placeholder = "Priority";
 
-        const projectInput = document.createElement('input');
-        projectInput.id = 'project-input';
-        projectInput.placeholder = "Project";
+        const projectSelect = document.createElement('select');
+        projectSelect.id = 'project-select';
+        projectSelect.placeholder = "Project";
+        // set the projectSelect element to have all necessary options
+        populateSelect(projectSelect);
 
         // won't add an input for checked, as checked should be false by default
         creationDiv.append(createTodoBtn, titleInput, descTextarea, datePicker, 
-            priorityInput, projectInput);
+            priorityInput, projectSelect);
         holderDiv.append(createHeader, creationDiv);
         // return creationDiv;
         return holderDiv;
+    }
+
+    function populateSelect(projSelect) {
+        // let projSelect = document.querySelector('#project-select');
+        // clear any select elements to start fresh every time
+        let projectsArray = getProjectsArray();
+        while (projSelect.firstChild) {
+        // if (projSelect.firstChild) {
+            projSelect.lastChild.remove();
+        }
+        for (let i = 0; i < projectsArray.length; i++) {
+            let option = document.createElement('option');
+            option.text = projectsArray[i];
+            projSelect.add(option);
+        }
     }
 
     // This is used for the general page
@@ -220,7 +238,7 @@ const todoForm = (() => {
         let description = document.querySelector('#description-textarea').value;
         let dueDate = document.querySelector('#date-input').value;
         let priority = document.querySelector('#priority-input').value;
-        let project = document.querySelector('#project-input').value;
+        let project = document.querySelector('#project-select').value;
         let todo = new Todo(title, description, dueDate, priority, false, project);
         // Add row to table here
         addTodoRow(todo);
@@ -241,55 +259,13 @@ const todoForm = (() => {
             if (!projHeader) {
                 let row = makeRow(todoArray[i]);
                 body.appendChild(row);
-            } else if (projHeader.value === "General") {
+            } else if (projHeader.innerHTML === "General") {
                 //create a table row
                 let row = makeRow(todoArray[i]);
-                // const row = document.createElement("tr");
-                // row.setAttribute("data-ind", i);
-                // for (let j in todoArray[i]) {
-                //     // create td element and text node. text node fills the td
-                //     let cell = document.createElement('td');
-                //     let cellCont = document.createTextNode(`${todoArray[i][j]}`);
-                //     cell.appendChild(cellCont);
-                //     row.appendChild(cell);
-                // }
-                // // The following code is for creation of delete button
-                // let cell = document.createElement('td');
-                // let delButton = document.createElement('button');
-                // delButton.classList = 'del-btn';
-                // delButton.textContent = 'Delete';
-                // delButton.addEventListener('click', (e) => {
-                //     todoArray.splice(todoArray.findIndex(element => element === todoArray[i]), 1);
-                //     populateStorage();
-                //     e.target.parentNode.parentNode.remove();
-                // })
-                // cell.appendChild(delButton);
-                // row.appendChild(cell);
                 body.appendChild(row);
-            } else if (todoArray[i].project === projHeader.value){
+            } else if (todoArray[i].project === projHeader.innerHTML){
                 //create a table row
                 let row = makeRow(todoArray[i]);
-                // const row = document.createElement("tr");
-                // row.setAttribute("data-ind", i);
-                // for (let j in todoArray[i]) {
-                //     // create td element and text node. text node fills the td
-                //     let cell = document.createElement('td');
-                //     let cellCont = document.createTextNode(`${todoArray[i][j]}`);
-                //     cell.appendChild(cellCont);
-                //     row.appendChild(cell);
-                // }
-                // // The following code is for creation of delete button
-                // let cell = document.createElement('td');
-                // let delButton = document.createElement('button');
-                // delButton.classList = 'del-btn';
-                // delButton.textContent = 'Delete';
-                // delButton.addEventListener('click', (e) => {
-                //     todoArray.splice(todoArray.findIndex(element => element === todoArray[i]), 1);
-                //     populateStorage();
-                //     e.target.parentNode.parentNode.remove();
-                // })
-                // cell.appendChild(delButton);
-                // row.appendChild(cell);
                 body.appendChild(row);
             }
         }
@@ -326,7 +302,7 @@ const todoForm = (() => {
     //     let description = document.querySelector('#description-textarea').innerHTML;
     //     let dueDate = document.querySelector('#date-input').innerHTML;
     //     let priority = document.querySelector('#priority-input').innerHTML;
-    //     let project = document.querySelector('#project-input').innerHTML;
+    //     let project = document.querySelector('#project-select').innerHTML;
     //     // let todoDiv = new Todo(title, description, dueDate, priority, false).getTodoDiv();
     //     let todo = new Todo(title, description, dueDate, priority, false, project);        
     //     // document.querySelector('#right-div').appendChild(todoDiv);
